@@ -1,0 +1,177 @@
+/* ==========================================================
+   1. VARIABLES Y CONFIGURACIÓN BASE
+   ========================================================== */
+:root {
+  --primary-color: #1E3A8A;
+  --accent-color: #F59E0B;
+  --dark-text-color: #1F2937;
+  --gray-text-color: #6B7280;
+  --light-border-color: #E5E7EB;
+  --light-background-color: #FFFFFF;
+  --font-family-body: 'Nunito', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-family-body);
+  padding-top: 76px; /* Header móvil */
+  background-color: #fff;
+}
+
+@media (min-width: 768px) {
+  body {
+    padding-top: 90px; /* Header desktop */
+  }
+}
+
+/* Bloqueo de scroll global */
+body.overflow-hidden {
+  overflow: hidden !important;
+  position: relative;
+}
+
+/* ==========================================================
+   2. HEADER PRINCIPAL (FIJO)
+   ========================================================== */
+#mainHeader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--light-border-color);
+}
+
+#headerContainer {
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ==========================================================
+   3. BUSCADOR MÓVIL (OVERLAY SUPERIOR)
+   ========================================================== */
+#searchMobileOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 76px;
+  background: #FFFFFF;
+  z-index: 120; /* por encima del header y sidebar */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  pointer-events: auto;
+}
+
+/* Oculto por defecto (Tailwind hidden) */
+#searchMobileOverlay.hidden {
+  display: none !important;
+}
+
+/* Animación al mostrarse */
+#searchMobileOverlay:not(.hidden) {
+  animation: slideInDown 0.25s ease-out forwards;
+  will-change: transform;
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Input del buscador móvil */
+#mobileInput {
+  font-size: 16px; /* evita zoom en iOS */
+}
+
+/* ==========================================================
+   4. SIDEBAR MÓVIL (MENÚ DERECHO)
+   ========================================================== */
+#mobileSidebar {
+  position: fixed;
+  visibility: 0;
+  right: 0;
+  width: 280px;
+  background: #FFFFFF;
+  z-index: 110;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -10px 0 25px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estado abierto */
+#mobileSidebar:not(.translate-x-full) {
+  transform: translateX(0) !important;
+}
+
+/* ==========================================================
+   5. OVERLAY OSCURO (FONDO)
+   ========================================================== */
+#sidebarOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 105;
+  transition: opacity 0.3s ease;
+}
+
+/* Oculto */
+#sidebarOverlay.hidden {
+  display: none !important;
+}
+
+/* ==========================================================
+   6. INTERACCIÓN TÁCTIL (FIXES)
+   ========================================================== */
+#openSearchMobile,
+#closeSearchMobile,
+#mobileMenuBtn,
+#closeSidebar {
+  touch-action: manipulation;
+}
+
+/* ==========================================================
+   7. BLINDAJE PARA ESCRITORIO
+   ========================================================== */
+@media (min-width: 768px) {
+  #mobileSidebar,
+  #sidebarOverlay,
+  #searchMobileOverlay,
+  #mobileMenuBtn {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: translateX(100%) !important;
+  }
+
+  body {
+    overflow: auto !important;
+  }
+}
+
+/* ==========================================================
+   8. AJUSTES EXTRA PARA MÓVIL
+   ========================================================== */
+@media (max-width: 767px) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}

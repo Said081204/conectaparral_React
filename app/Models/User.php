@@ -3,29 +3,41 @@
 namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordContract
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, CanResetPassword;
 
+    /**
+     * Los atributos que se pueden asignar masivamente.
+     * Incluye tus campos personalizados: last_name, phone, role e is_active.
+     */
     protected $fillable = [
         'name',
-        'last_name', // 1. Agregado para Apellidos
+        'last_name', // Apellidos
         'email',
-        'phone',     // 2. Agregado para Teléfono celular
+        'phone',     // Teléfono celular
         'password',
         'role',
         'is_active',
     ];
 
+    /**
+     * Los atributos que deben estar ocultos para la serialización.
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
+    /**
+     * Los atributos que deben ser convertidos a tipos nativos.
+     */
     protected function casts(): array
     {
         return [
@@ -35,10 +47,14 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    // --- Relaciones ---
+
     public function vendorProfile()
     {
         return $this->hasOne(VendorProfile::class);
     }
+
+    // --- Métodos de Ayuda para Roles ---
 
     public function isAdmin(): bool
     {
