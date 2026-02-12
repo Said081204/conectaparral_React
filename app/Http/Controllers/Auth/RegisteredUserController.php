@@ -9,14 +9,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Validation\Rules; 
 use Inertia\Inertia;
 use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Muestra la vista de registro.
      */
     public function create(): Response
     {
@@ -24,12 +24,11 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Maneja una solicitud de registro entrante.
      */
     public function store(Request $request): RedirectResponse
     {
+        // 1. VALIDACIÓN: Aseguramos que lleguen todos los campos necesarios.
         $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -38,20 +37,28 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // 2. CREACIÓN: Guardamos al usuario con rol 'customer' y estado activo.
         $user = User::create([
             'name' => $request->name,
             'last_name' => $request->last_name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
-            'role' => 'customer',
-            'is_active' => true,
+            'role' => 'customer', 
+            'is_active' => true,  
         ]);
 
+        // 3. EVENTO Y LOGIN: 
+        // Se dispara el evento que envía el correo de verificación automáticamente.
         event(new Registered($user));
-
+        
+        // Iniciamos sesión para que el usuario no tenga que loguearse manualmente.
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // 4. REDIRECCIÓN ADAPTADA:
+        // Cambiamos 'dashboard' por '/' para que el usuario aterrice en la tienda.
+        // Si el correo no está verificado, el sistema lo redirigirá 
+        // automáticamente a la vista de "VerifyEmail" gracias a los filtros de Laravel.
+        return redirect('/'); 
     }
 }

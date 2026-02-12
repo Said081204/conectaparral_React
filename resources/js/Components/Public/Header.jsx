@@ -80,7 +80,7 @@ export default function Header({ user = null }) {
             </a>
           ) : (
             /* LOGUEADO */
-            <a href="/mi-cuenta" className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
+            <a href="/profile" className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 active:scale-95 transition">
               <img src="/icons/usuario.svg" alt="Mi cuenta" className="w-6 h-6 md:w-7 md:h-7 select-none" />
               <div className="hidden lg:flex flex-col -space-y-1">
                 <span className="text-[12px] text-gray-500">Hola, {user.name}</span>

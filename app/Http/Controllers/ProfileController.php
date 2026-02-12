@@ -14,7 +14,7 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Muestra el formulario para editar el perfil del usuario.
      */
     public function edit(Request $request): Response
     {
@@ -25,23 +25,33 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update the user's profile information.
+     * Actualiza la información del perfil del usuario.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        // 1. Cargamos los datos validados (name, last_name, email, phone)
+        $user = $request->user();
+        $user->fill($request->validated());
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // 2. SEGURIDAD DE PEDIDOS: Si cambia el correo, invalidamos la verificación.
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+            
+            // Opcional: Podrías disparar el evento de notificación de nuevo aquí
+            // $user->sendEmailVerificationNotification();
         }
 
-        $request->user()->save();
+        // 3. Guardamos todos los datos (incluyendo apellidos y teléfono para las guías)
+        $user->save();
 
-        return Redirect::route('profile.edit');
+        // 4. Redirección inteligente:
+        // Si el usuario ya no está verificado, Laravel lo mandará a la pantalla 
+        // de "Verify Email" automáticamente en la siguiente petición.
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
-     * Delete the user's account.
+     * Elimina la cuenta del usuario de forma definitiva.
      */
     public function destroy(Request $request): RedirectResponse
     {

@@ -4,13 +4,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Mailer
+    | Sistema de Envío Predeterminado (Mailer)
     |--------------------------------------------------------------------------
+    | Define qué servicio se usará para enviar correos por defecto.
     |
-    | This option controls the default mailer that is used to send all email
-    | messages unless another mailer is explicitly specified when sending
-    | the message. All additional mailers can be configured within the
-    | "mailers" array. Examples of each type of mailer are provided.
+    | Esta opción controla el remitente de correo predeterminado que se utiliza 
+    | para enviar todos los mensajes de correo, a menos que se especifique 
+    | otro explícitamente al enviar el mensaje. Todos los remitentes 
+    | adicionales pueden configurarse dentro del arreglo "mailers".
     |
     */
 
@@ -18,18 +19,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Mailer Configurations
+    | Configuraciones del Remitente (Mailer)
     |--------------------------------------------------------------------------
+    | Aquí configuras los servidores de correo (SMTP, Mailgun, Postmark, etc).
     |
-    | Here you may configure all of the mailers used by your application plus
-    | their respective settings. Several examples have been configured for
-    | you and you are free to add your own as your application requires.
+    | Aquí puedes configurar todos los remitentes de correo utilizados por tu 
+    | aplicación junto con sus respectivos ajustes. Se han configurado varios 
+    | ejemplos para ti y eres libre de añadir los tuyos propios.
     |
-    | Laravel supports a variety of mail "transport" drivers that can be used
-    | when delivering an email. You may specify which one you're using for
-    | your mailers below. You may also add additional mailers if needed.
+    | Laravel admite una variedad de controladores de "transporte" de correo.
+    | Puedes especificar cuál estás usando para tus remitentes a continuación.
     |
-    | Supported: "smtp", "sendmail", "mailgun", "ses", "ses-v2",
+    | Soportados: "smtp", "sendmail", "mailgun", "ses", "ses-v2",
     |            "postmark", "resend", "log", "array",
     |            "failover", "roundrobin"
     |
@@ -101,12 +102,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Global "From" Address
+    | Dirección de Remitente Global ("From")
     |--------------------------------------------------------------------------
+    | Define el nombre y el correo que aparecerán como remitente en los mensajes.
     |
-    | You may wish for all emails sent by your application to be sent from
-    | the same address. Here you may specify a name and address that is
-    | used globally for all emails that are sent by your application.
+    | Es posible que desees que todos los correos electrónicos enviados por tu 
+    | aplicación se envíen desde la misma dirección. Aquí puedes especificar 
+    | un nombre y una dirección que se utilizarán globalmente para todos los 
+    | correos electrónicos enviados por tu aplicación.
     |
     */
 

@@ -6,12 +6,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Default Cache Store
+    | Almacenamiento de Caché Predeterminado
     |--------------------------------------------------------------------------
+    | Define qué sistema de memoria se usará por defecto en ConectaParral.
     |
-    | This option controls the default cache store that will be used by the
-    | framework. This connection is utilized if another isn't explicitly
-    | specified when running a cache operation inside the application.
+    | Esta opción controla el almacén de caché predeterminado que será utilizado
+    | por el framework. Esta conexión se utiliza si no se especifica otra
+    | explícitamente al ejecutar una operación de caché dentro de la aplicación.
     |
     */
 
@@ -19,16 +20,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache Stores
+    | Almacenes de Caché
     |--------------------------------------------------------------------------
+    | Aquí se definen todos los "depósitos" de memoria disponibles y sus drivers.
     |
-    | Here you may define all of the cache "stores" for your application as
-    | well as their drivers. You may even define multiple stores for the
-    | same cache driver to group types of items stored in your caches.
+    | Aquí puedes definir todos los "almacenes" de caché para tu aplicación, así
+    | como sus controladores (drivers). Incluso puedes definir múltiples almacenes
+    | para el mismo controlador para agrupar tipos de elementos guardados.
     |
-    | Supported drivers: "array", "database", "file", "memcached",
-    |                    "redis", "dynamodb", "octane",
-    |                    "failover", "null"
+    | Controladores soportados: "array", "database", "file", "memcached",
+    |                           "redis", "dynamodb", "octane",
+    |                           "failover", "null"
     |
     */
 
@@ -103,12 +105,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache Key Prefix
+    | Prefijo de la Llave de Caché
     |--------------------------------------------------------------------------
+    | Evita que los datos de esta app se mezclen con otros en el mismo servidor.
     |
-    | When utilizing the APC, database, memcached, Redis, and DynamoDB cache
-    | stores, there might be other applications using the same cache. For
-    | that reason, you may prefix every cache key to avoid collisions.
+    | Al utilizar almacenes de caché como APC, base de datos, memcached, Redis 
+    | y DynamoDB, podría haber otras aplicaciones usando el mismo caché. Por
+    | esa razón, puedes prefijar cada llave de caché para evitar colisiones.
     |
     */
 

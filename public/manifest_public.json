@@ -1,0 +1,25 @@
+{
+    "id": "conectaparral-public",
+    "name": "ConectaParral Clientes",
+    "short_name": "CP Clientes",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#1E3A8A",
+    "description": "Tu mercado local en Hidalgo del Parral",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "/favicon/web-app-manifest-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/favicon/web-app-manifest-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}
