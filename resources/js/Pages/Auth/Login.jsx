@@ -49,13 +49,17 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Iniciar sesión" />
 
-            {/* ENCABEZADO: Título principal y bienvenida */}
+            {/* ENCABEZADO: Título principal y bienvenida con branding oficial */}
             <div className="text-center mb-8" style={fontStyle}>
                 <h1 className="text-2xl font-bold tracking-tight text-[#1F2937]">
                     Iniciar sesión
                 </h1>
                 <p className="mt-2 text-sm text-[#6B7280]">
-                    Bienvenido de nuevo a <span className="text-[#1E3A8A] font-bold">ConectaParral</span>.
+                    Bienvenido de nuevo a{' '}
+                    <span className="font-bold">
+                        <span className="text-[#1E3A8A]">Conecta</span>
+                        <span className="text-amber-400">Parral</span>
+                    </span>.
                 </p>
             </div>
 
@@ -146,11 +150,11 @@ export default function Login({ status, canResetPassword }) {
                     <div className="flex-grow border-t border-gray-200"></div>
                 </div>
 
-                {/* --- BOTÓN DE GOOGLE --- */}
-                <button
-                    type="button"
-                    onClick={() => { /* Aquí conectarías con tu ruta de Socialite/Google */ }}
+                {/* --- BOTÓN DE GOOGLE - Convertido a Enlace --- */}
+                <a
+                    href={route('google.login')}
                     className="w-full h-12 rounded border border-gray-300 bg-white text-sm font-bold text-[#1F2937] flex items-center justify-center gap-3 hover:bg-gray-50 transition-all shadow-sm hover:shadow-md active:scale-[0.98]"
+                    style={{ textDecoration: 'none' }}
                 >
                     {/* SVG oficial del logo de Google */}
                     <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -160,7 +164,7 @@ export default function Login({ status, canResetPassword }) {
                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                     </svg>
                     INICIAR SESIÓN CON GOOGLE
-                </button>
+                </a>
 
                 {/* --- PIE DE PÁGINA: LEGALES --- */}
                 <div className="pt-8 border-t border-gray-100 mt-6 text-center">

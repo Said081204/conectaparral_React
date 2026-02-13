@@ -14,19 +14,19 @@ class VerifyEmailController extends Controller
      */
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
-        // 1. Si el usuario ya estaba verificado, lo mandamos a la página principal.
+        // 1. Si el usuario ya hizo clic o ya está verificado
         if ($request->user()->hasVerifiedEmail()) {
-            // Cambiamos route('dashboard') por '/'
-            return redirect()->intended('/'.'?verified=1');
+            // Forzamos el redireccionamiento a '/' ignorando cualquier memoria de 'intended'
+            return redirect('/')->with('verified', true);
         }
 
-        // 2. Marcamos como verificado en la BD.
+        // 2. Marcamos como verificado
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
         }
 
-        // 3. Redirección final tras el éxito de verificación.
-        // Ahora el usuario caerá en la raíz de ConectaParral para empezar a ver productos.
-        return redirect()->intended('/'.'?verified=1');
+        // 3. Redirección tras éxito: Directo a Home.jsx
+        // Usamos redirect('/') en lugar de redirect()->intended()
+        return redirect('/')->with('verified', true);
     }
 }

@@ -28,13 +28,19 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // 1. VALIDACIÓN: Aseguramos que lleguen todos los campos necesarios.
+        // 1. VALIDACIÓN: Ahora incluimos la regla 'unique' para el teléfono y mensajes en español.
         $request->validate([
             'name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'phone' => 'required|string|max:20',
+            // Agregamos 'unique:users' para que no se repita el celular
+            'phone' => 'required|string|max:20|unique:users', 
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            // Mensajes personalizados para que el usuario entienda el error
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'phone.unique' => 'Este número de teléfono ya está registrado en ConectaParral.',
+            'phone.required' => 'El número de teléfono es obligatorio.',
         ]);
 
         // 2. CREACIÓN: Guardamos al usuario con rol 'customer' y estado activo.
@@ -49,16 +55,11 @@ class RegisteredUserController extends Controller
         ]);
 
         // 3. EVENTO Y LOGIN: 
-        // Se dispara el evento que envía el correo de verificación automáticamente.
         event(new Registered($user));
         
-        // Iniciamos sesión para que el usuario no tenga que loguearse manualmente.
         Auth::login($user);
 
-        // 4. REDIRECCIÓN ADAPTADA:
-        // Cambiamos 'dashboard' por '/' para que el usuario aterrice en la tienda.
-        // Si el correo no está verificado, el sistema lo redirigirá 
-        // automáticamente a la vista de "VerifyEmail" gracias a los filtros de Laravel.
-        return redirect('/'); 
+        // 4. REDIRECCIÓN:
+        return redirect()->route('verification.notice');
     }
 }

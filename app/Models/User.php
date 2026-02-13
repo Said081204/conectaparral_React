@@ -9,113 +9,112 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * IMPORTACIONES PARA PERSONALIZAR CORREOS
+ * VerifyEmail: La lógica original de verificación.
+ * ResetPassword: La lógica original de recuperación de contraseña.
+ * MailMessage: Herramienta para construir el diseño del correo (botones, líneas, saludos).
+ */
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Notifications\Messages\MailMessage;
+
 class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordContract
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Rasgos y Capacidades (Traits)
-    |--------------------------------------------------------------------------
-    | HasFactory: Permite crear usuarios de prueba rápidamente.
-    | Notifiable: Permite enviar correos o notificaciones al usuario.
-    | CanResetPassword: Habilitar la funcionalidad de recuperar contraseña.
-    |
-    */
     use HasFactory, Notifiable, CanResetPassword;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Atributos Asignables (Fillable)
-    |--------------------------------------------------------------------------
-    | Define qué campos puede guardar el usuario desde los formularios de la web.
-    |
-    | Estos campos son los que Laravel permite guardar masivamente (User::create).
-    | Es vital incluir last_name, phone, role e is_active para que el registro funcione.
-    |
-    */
     protected $fillable = [
         'name',
-        'last_name', // Apellidos del usuario
+        'last_name',
         'email',
-        'phone',     // Teléfono celular (vital para contacto en el marketplace)
+        'phone',
         'password',
-        'role',      // Define si es admin, vendor o customer
-        'is_active', // Permite activar o desactivar la cuenta
+        'role',
+        'is_active',
+        'google_id',
+        'email_verified_at'
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Atributos Ocultos (Hidden)
-    |--------------------------------------------------------------------------
-    | Datos sensibles que nunca deben enviarse en las respuestas de la API.
-    |
-    | Por seguridad, cuando conviertas un usuario a JSON (para React/Vue), 
-    | nunca se enviará la contraseña ni el token de sesión.
-    |
-    */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | Conversión de Tipos (Casts)
-    |--------------------------------------------------------------------------
-    | Define cómo se tratan los datos al entrar o salir de la base de datos.
-    |
-    */
     protected function casts(): array
     {
         return [
-            // Convierte la fecha de verificación en un objeto de tiempo de Carbon
             'email_verified_at' => 'datetime',
-            // Indica que la contraseña siempre debe guardarse encriptada
             'password' => 'hashed',
-            // Asegura que is_active siempre sea tratado como verdadero o falso (bool)
             'is_active' => 'boolean',
         ];
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Relaciones entre Modelos
-    |--------------------------------------------------------------------------
-    | Define cómo se conecta el usuario con otras tablas del Marketplace.
-    |
-    */
-
     /**
-     * Relación uno a uno con el perfil de vendedor.
-     * Si el usuario es vendedor, aquí se guarda la info de su tienda.
+     * Relación con el perfil de vendedor.
      */
     public function vendorProfile()
     {
         return $this->hasOne(VendorProfile::class);
     }
 
+    /**
+     * Helpers para verificar roles rápidamente.
+     */
+    public function isAdmin(): bool { return $this->role === 'admin'; }
+    public function isVendor(): bool { return $this->role === 'vendor'; }
+    public function isCustomer(): bool { return $this->role === 'customer'; }
+
     /*
     |--------------------------------------------------------------------------
-    | Métodos de Ayuda (Helpers) de Rol
+    | PERSONALIZACIÓN DE NOTIFICACIONES (CORREOS)
     |--------------------------------------------------------------------------
-    | Permiten hacer preguntas rápidas: if($user->isAdmin())...
-    |
+    | Estos métodos sobrescriben los que Laravel trae por defecto. 
+    | Nos permiten cambiar el idioma inglés a español y ajustar los textos.
     */
 
-    /** Verifica si el usuario es administrador */
-    public function isAdmin(): bool
+    /**
+     * Personalización del correo de Verificación de Email.
+     * Se activa automáticamente cuando un usuario se registra.
+     */
+    public function sendEmailVerificationNotification()
     {
-        return $this->role === 'admin';
+        // Creamos una "clase anónima" que extiende de la original para cambiar solo el mensaje
+        $this->notify(new class extends VerifyEmail {
+            public function toMail($notifiable)
+            {
+                return (new MailMessage)
+                    ->subject('¡Bienvenido! Confirma tu correo en ConectaParral') // Título del correo
+                    ->greeting('¡Hola, qué gusto saludarte!') // Saludo inicial
+                    ->line('Gracias por registrarte en ConectaParral. Para activar tu cuenta y comenzar a explorar, por favor confirma tu dirección de correo electrónico.')
+                    ->action('Verificar mi cuenta', $this->verificationUrl($notifiable)) // Texto del botón y URL generada
+                    ->line('Si no creaste esta cuenta, simplemente ignora este mensaje.')
+                    ->salutation('Atentamente, El equipo de ConectaParral'); // Despedida
+            }
+        });
     }
 
-    /** Verifica si el usuario es un vendedor */
-    public function isVendor(): bool
+    /**
+     * Personalización del correo de Restablecimiento de Contraseña.
+     * Se activa cuando el usuario olvida su clave y pide el enlace de recuperación.
+     */
+    public function sendPasswordResetNotification($token)
     {
-        return $this->role === 'vendor';
-    }
-
-    /** Verifica si el usuario es un cliente regular */
-    public function isCustomer(): bool
-    {
-        return $this->role === 'customer';
+        // Pasamos el $token necesario para que el enlace sea válido y seguro
+        $this->notify(new class($token) extends ResetPassword {
+            public function toMail($notifiable)
+            {
+                return (new MailMessage)
+                    ->subject('Recuperar Contraseña - ConectaParral')
+                    ->greeting('¡Hola!')
+                    ->line('Recibimos una solicitud para restablecer la contraseña de tu cuenta.')
+                    ->action('Cambiar contraseña', url(route('password.reset', [
+                        'token' => $this->token,
+                        'email' => $notifiable->getEmailForPasswordReset(),
+                    ], false)))
+                    ->line('Este enlace expirará en 60 minutos.')
+                    ->line('Si no solicitaste este cambio, no es necesario realizar ninguna acción.')
+                    ->salutation('Saludos, ConectaParral');
+            }
+        });
     }
 }

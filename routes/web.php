@@ -1,25 +1,33 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\GoogleController; // <--- IMPORTANTE: Añade esta línea
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
-| 1. Autenticación (Sistema Breeze)
+| 1. Autenticación Social (Google)
+|--------------------------------------------------------------------------
+*/
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+
+/*
+|--------------------------------------------------------------------------
+| 2. Autenticación (Sistema Breeze)
 |--------------------------------------------------------------------------
 */
 require __DIR__.'/auth.php';
 
 /*
 |--------------------------------------------------------------------------
-| 2. Zona Protegida (EL FILTRO DE SEGURIDAD)
+| 3. Zona Protegida (EL FILTRO DE SEGURIDAD)
 |--------------------------------------------------------------------------
-| Aquí aplicamos 'auth' (que esté logueado) y 'verified' (que el correo sea real).
 */
 Route::middleware(['auth', 'verified'])->group(function () {
     
-    // Panel de Control - A donde llega el usuario tras registrarse
+    // Panel de Control
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
@@ -28,14 +36,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    // NOTA: Si quieres que los Vendedores también verifiquen su correo 
-    // antes de vender, sus rutas deberían ir dentro de este grupo.
 });
 
 /*
 |--------------------------------------------------------------------------
-| 3. Módulos Externos y Rutas Públicas
+| 4. Módulos Externos y Rutas Públicas
 |--------------------------------------------------------------------------
 */
 require __DIR__.'/public.php'; // Lo que ven los visitantes

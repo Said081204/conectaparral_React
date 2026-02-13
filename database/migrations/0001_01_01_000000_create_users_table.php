@@ -6,45 +6,44 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Ejecuta las migraciones.
-     * * Crea las tablas base de ConectaParral: usuarios, tokens y sesiones.
-     * * Run the migrations.
-     */
     public function up(): void
     {
-        // Crea la tabla de 'users' (usuarios) UNIFICADA
         Schema::create('users', function (Blueprint $table) {
             $table->id(); 
             
             // --- Datos de Identidad ---
-            $table->string('name'); // Nombre(s)
-            $table->string('last_name')->nullable(); // Apellidos (Unificado aquí)
+            $table->string('name'); 
+            $table->string('last_name')->nullable(); 
             
             // --- Contacto y Seguridad ---
             $table->string('email')->unique(); 
-            $table->string('phone')->nullable(); // Teléfono (Unificado aquí)
+            // Añadimos nullable() porque Google no da el teléfono
+            $table->string('phone')->nullable()->unique(); 
             $table->timestamp('email_verified_at')->nullable(); 
-            $table->string('password'); 
+            // Añadimos nullable() porque el login de Google no usa contraseña de tu sitio
+            $table->string('password')->nullable(); 
+
+            // --- Campos para Login Social ---
+            // Guardamos el ID único de Google para reconocer al usuario siempre
+            $table->string('google_id')->nullable()->unique();
 
             // --- Control de Roles y Estado ---
-            // 'customer', 'vendor', 'admin'
-            $table->string('role')->default('customer'); // Rol (Unificado aquí)
-            $table->boolean('is_active')->default(true); // Estado (Unificado aquí)
+            $table->string('role')->default('customer'); 
+            $table->boolean('is_active')->default(true); 
 
             // --- Tokens y Tiempos ---
             $table->rememberToken(); 
             $table->timestamps(); 
         });
 
-        // Crea la tabla para recuperar contraseñas olvidadas
+        // Tabla de contraseñas (Sin cambios)
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary(); 
             $table->string('token'); 
             $table->timestamp('created_at')->nullable(); 
         });
 
-        // Crea la tabla para gestionar las sesiones activas (Carrito, login, etc)
+        // Tabla de sesiones (Sin cambios)
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary(); 
             $table->foreignId('user_id')->nullable()->index(); 
@@ -55,9 +54,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Revierte las migraciones (Borra todo).
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

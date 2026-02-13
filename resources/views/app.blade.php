@@ -8,8 +8,9 @@
 
         {{-- Lógica para cargar el Manifest según el subdominio --}}
         @php
-            $host = $_SERVER['HTTP_HOST'];
-            $manifest = 'manifest_public.json'; // Por defecto
+            // Agregamos el fallback ?? '' por seguridad
+            $host = $_SERVER['HTTP_HOST'] ?? '';
+            $manifest = 'manifest_public.json'; 
 
             if (str_contains($host, 'vendor.')) {
                 $manifest = 'manifest_vendor.json';
@@ -26,9 +27,11 @@
         <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16.png') }}?v=1">
         <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('img/apple-touch-icon.png') }}">
         
+        {{-- Fuentes --}}
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        {{-- Scripts y Estilos (Vite) --}}
         @routes
         @viteReactRefresh
         @vite(['resources/js/app.jsx', "resources/js/Pages/{$page['component']}.jsx"])
@@ -37,23 +40,18 @@
     <body class="font-sans antialiased">
         @inertia
 
-        {{-- Registro del Service Worker para que la PWA sea instalable --}}
+        {{-- Registro único del Service Worker para PWA --}}
         <script>
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                        console.log('ServiceWorker registrado con éxito: ', registration.scope);
-                    }, function(err) {
-                        console.log('Fallo en el registro del ServiceWorker: ', err);
-                    });
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(function(registration) {
+                            console.log('SW registrado con éxito en: ', registration.scope);
+                        })
+                        .catch(function(err) {
+                            console.log('Fallo en el registro del SW: ', err);
+                        });
                 });
-            }
-        </script>
-
-
-        <script>
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/sw.js');
             }
         </script>
     </body>

@@ -57,6 +57,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         // Redirige al usuario a la página de inicio (raíz)
-        return redirect('/');
+        return redirect()->intended('/');
     }
 }

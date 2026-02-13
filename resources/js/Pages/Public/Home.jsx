@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PublicLayout from "@/Layouts/PublicLayout";
+import { usePage } from "@inertiajs/react";
 
 // Componentes adaptados
 import Portada from "@/Components/Public/Portada";
@@ -7,35 +8,30 @@ import Categorias from "@/Components/Public/Categorias";
 import Productos from "@/Components/Public/Productos";
 
 export default function Home({ auth }) {
-  // Nota: Si usas Laravel + Inertia, 'auth' suele venir automáticamente 
-  // con la información del usuario logueado.
+    // Usamos usePage de forma segura
+    const { props } = usePage();
+    
+    // Obtenemos flash con un valor por defecto para evitar el pantallazo blanco
+    const flash = props?.flash || {};
 
-  return (
-    <PublicLayout user={auth?.user}>
-      
-      {/* 1. PORTADA / HERO SECTION 
-          Carrusel con diseño de bordes rectos y sombras suaves
-      */}
-      <Portada />
+    useEffect(() => {
+        // Solo ejecutamos la lógica si existe el mensaje específico
+        if (flash.verified === true || flash.status === 'verification-success') {
+            alert("¡Cuenta verificada con éxito! Bienvenido a ConectaParral.");
+            
+            // Opcional: Limpiar el mensaje de la URL para que no salga el alert cada vez que recargues
+            // window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }, [flash]);
 
-      {/* 2. CONTENIDO PRINCIPAL 
-          Usamos un contenedor con padding para separar las secciones
-      */}
-      <main className="space-y-4 sm:space-y-8 pb-20">
-        
-        {/* SECCIÓN DE CATEGORÍAS 
-            Ideal para navegación rápida por iconos o tarjetas
-        */}
-        <Categorias />
+    return (
+        <PublicLayout user={auth?.user}>
+            <Portada />
 
-        {/* SECCIÓN DE PRODUCTOS 
-            Aquí vive toda la lógica de filtros, orden y vista (Grid/List) 
-            que adaptamos anteriormente.
-        */}
-        <Productos />
-
-      </main>
-
-    </PublicLayout>
-  );
+            <main className="space-y-4 sm:space-y-8 pb-20">
+                <Categorias />
+                <Productos />
+            </main>
+        </PublicLayout>
+    );
 }

@@ -27,25 +27,20 @@ class ConfirmablePasswordController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        // Intenta validar la contraseña proporcionada contra el email del usuario logueado
         if (! Auth::guard('web')->validate([
             'email' => $request->user()->email,
             'password' => $request->password,
         ])) {
-            // Si la contraseña es incorrecta, lanza una excepción de validación
-            // con el mensaje de error configurado en los archivos de idioma (auth.password)
             throw ValidationException::withMessages([
                 'password' => __('auth.password'),
             ]);
         }
 
-        // Si la contraseña es correcta, guarda en la sesión el momento exacto (timestamp)
-        // en el que se confirmó la contraseña. Esto evita que el sistema vuelva a pedirla 
-        // durante un tiempo (por defecto 3 horas).
         $request->session()->put('auth.password_confirmed_at', time());
 
-        // Redirige al usuario a la página a la que intentaba ir originalmente
-        // o al dashboard si no había una ruta previa guardada.
-        return redirect()->intended(route('dashboard', absolute: false));
+        // CAMBIO AQUÍ: 
+        // intended('/') intenta llevarte a donde ibas (ej. a pagar o a editar perfil)
+        // y si no hay nada guardado, te manda al Home.
+        return redirect()->intended('/');
     }
 }
