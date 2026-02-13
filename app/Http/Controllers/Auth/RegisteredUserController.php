@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
             // Agregamos 'unique:users' para que no se repita el celular
-            'phone' => 'required|string|max:20|unique:users', 
+            'phone' => 'required|string|max:10|unique:users', 
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ], [
             // Mensajes personalizados para que el usuario entienda el error
