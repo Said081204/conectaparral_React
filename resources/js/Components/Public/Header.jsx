@@ -62,8 +62,8 @@ export default function Header({ user = null }) {
             </svg>
           </button>
 
-          {/* CUENTA DESKTOP */}
-          <Link href={user ? "/profile" : "/login"} className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition text-left">
+          {/* CUENTA DESKTOP - Redirige a Perfil */}
+          <Link href={user ? "/profile?tab=perfil" : "/login"} className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-50 transition text-left">
             <img src="/icons/usuario.svg" alt="User" className="w-6 h-6 md:w-7 md:h-7" />
             <div className="hidden lg:flex flex-col -space-y-1">
               <span className="text-[12px] text-gray-500 font-bold">Hola, {user ? user.name.split(' ')[0] : 'Identifícate'}</span>
@@ -71,8 +71,8 @@ export default function Header({ user = null }) {
             </div>
           </Link>
 
-          {/* PEDIDOS DESKTOP (IMPORTANTE: SE MANTIENE) */}
-          <Link href="/orders" className="hidden md:flex items-center gap-2 px-4 py-2 border-l border-gray-100 hover:bg-gray-50 transition text-left">
+          {/* PEDIDOS DESKTOP - Redirige a Mis Pedidos en el panel */}
+          <Link href={user ? "/profile?tab=pedidos" : "/login"} className="hidden md:flex items-center gap-2 px-4 py-2 border-l border-gray-100 hover:bg-gray-50 transition text-left">
             <img src="/icons/pedidos.svg" alt="Pedidos" className="w-6 h-6 md:w-7 md:h-7" />
             <div className="hidden lg:flex flex-col leading-tight">
               <span className="text-[12px] text-gray-500">Devoluciones</span>
@@ -95,7 +95,7 @@ export default function Header({ user = null }) {
       {/* ================= SIDEBAR MÓVIL ================= */}
       <div className={`fixed inset-y-0 right-0 w-[310px] bg-white z-[110] shadow-2xl transform transition-transform duration-500 md:hidden flex flex-col ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
-        {/* Banner Superior Premium */}
+        {/* Banner Superior */}
         <div className="px-6 pt-14 pb-8 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
           <div className="flex justify-between items-start relative z-10">
             <div className="flex flex-col gap-4">
@@ -119,14 +119,14 @@ export default function Header({ user = null }) {
         {/* Opciones del Menú */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
           <nav className="space-y-1">
-            <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-[2px] mb-4">Menú</p>
+            <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-[2px] mb-4">Navegación</p>
             <SidebarItem href="/" text="Inicio" icon="home" onClick={toggleSidebar} />
-            <SidebarItem href="/orders" text="Mis Pedidos" icon="package" onClick={toggleSidebar} />
+            <SidebarItem href={user ? "/profile?tab=pedidos" : "/login"} text="Mis Pedidos" icon="package" onClick={toggleSidebar} />
             <SidebarItem href="/cart" text="Mi Carrito" icon="shopping-cart" onClick={toggleSidebar} badge="2" />
             
             <div className="h-px bg-gray-50 my-6 mx-4" />
             
-            <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-[2px] mb-4">Usuario</p>
+            <p className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-[2px] mb-4">Mi Cuenta</p>
 
             {!user ? (
               <>
@@ -135,10 +135,11 @@ export default function Header({ user = null }) {
               </>
             ) : (
               <>
-                <SidebarItem href="/profile" text="Mi Perfil" icon="user" onClick={toggleSidebar} />
+                <SidebarItem href="/profile?tab=perfil" text="Mi Perfil" icon="user" onClick={toggleSidebar} />
+                <SidebarItem href="/profile?tab=direcciones" text="Mis Direcciones" icon="package" onClick={toggleSidebar} />
                 <button 
                   onClick={() => { router.post('/logout'); toggleSidebar(); }}
-                  className="w-full flex items-center gap-4 px-4 py-4 text-red-500 font-bold text-[15px] hover:bg-red-50 rounded-2xl transition-all"
+                  className="w-full flex items-center gap-4 px-4 py-4 text-red-500 font-bold text-[15px] hover:bg-red-50 rounded-2xl transition-all mt-2"
                 >
                   <div className="w-6 flex justify-center text-red-500">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -153,6 +154,7 @@ export default function Header({ user = null }) {
         </div>
       </div>
 
+      {/* Overlay del Sidebar */}
       {isSidebarOpen && (
         <div onClick={toggleSidebar} className="fixed inset-0 bg-black/60 backdrop-blur-[3px] z-[105] md:hidden transition-all duration-500" />
       )}
@@ -161,6 +163,7 @@ export default function Header({ user = null }) {
 }
 
 function SidebarItem({ href, text, onClick, badge = null, icon }) {
+  // Mapeo de iconos SVG (sin cambios, solo agregué el de direcciones que reusa el de package)
   const icons = {
     "home": <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
     "package": <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />,

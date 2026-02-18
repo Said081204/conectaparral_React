@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Head, Link } from '@inertiajs/react';
 import Header from "@/Components/Public/Header";
 import Footer from "@/Components/Public/Footer";
-// CORRECCIÓN: Aseguramos que el import sea de lucide-react
 import { 
     User, Lock, MapPin, ShoppingBag, LogOut, ChevronRight, 
     FileText, ShieldAlert, Info, Truck, RotateCcw, Home 
@@ -17,10 +16,21 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import MyOrders from './Partials/MyOrders';
 import AddressManager from './Partials/AddressManager';
 
-// AGREGAMOS 'addresses' a las props (viene desde el controlador de Laravel)
 export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) {
+    // Estado inicial: intentamos leer de la URL, si no, por defecto 'pedidos'
     const [activeSection, setActiveSection] = useState('pedidos');
     const [showForm, setShowForm] = useState(false);
+
+    // Lógica para detectar el cambio de sección mediante parámetros URL (?tab=...)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const tab = params.get('tab');
+        
+        const validTabs = ['pedidos', 'direcciones', 'perfil', 'password', 'legal'];
+        if (tab && validTabs.includes(tab)) {
+            setActiveSection(tab);
+        }
+    }, []);
 
     const mainStyle = { 
         fontFamily: "'Nunito', sans-serif",
@@ -31,6 +41,8 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
     const changeSection = (section) => {
         setActiveSection(section);
         setShowForm(false);
+        // Opcional: Limpia la URL para evitar comportamientos extraños al recargar
+        window.history.replaceState({}, '', window.location.pathname);
     };
 
     return (
@@ -77,13 +89,14 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                                 <SidebarLink label="Seguridad" icon={<Lock size={20}/>} active={activeSection === 'password'} onClick={() => changeSection('password')} />
                                 
                                 <div className="hidden lg:block h-2"></div>
+                                <div className="hidden lg:block"><SectionTitle label="Información" /></div>
                                 <SidebarLink label="Legal" icon={<FileText size={20}/>} active={activeSection === 'legal'} onClick={() => changeSection('legal')} />
                                 
                                 <Link 
                                     href={route('logout')} 
                                     method="post" 
                                     as="button" 
-                                    className="flex lg:w-full items-center gap-4 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-all mt-4 lg:border-t lg:border-[#E5E7EB]"
+                                    className="flex lg:w-full items-center gap-4 px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-50 rounded-xl transition-all mt-4 lg:border-t lg:border-[#E5E7EB] text-left"
                                 >
                                     <LogOut size={18} strokeWidth={2.5} />
                                     <span className="uppercase tracking-wide">Cerrar Sesión</span>
@@ -96,26 +109,31 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                     <div className="flex-1 w-full">
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-6 lg:p-12 min-h-[600px]">
                             
-                            {activeSection === 'pedidos' && <MyOrders />}
+                            {activeSection === 'pedidos' && (
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <MyOrders />
+                                </div>
+                            )}
 
                             {activeSection === 'direcciones' && (
-                                /* PASAMOS LA PROP addresses AQUÍ */
-                                <AddressManager 
-                                    showForm={showForm} 
-                                    setShowForm={setShowForm} 
-                                    addresses={addresses} 
-                                />
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <AddressManager 
+                                        showForm={showForm} 
+                                        setShowForm={setShowForm} 
+                                        addresses={addresses} 
+                                    />
+                                </div>
                             )}
 
                             {activeSection === 'perfil' && (
-                                <div className="animate-in fade-in duration-500">
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] mb-8 border-b-2 border-[#E5E7EB] pb-4 uppercase">Información del Perfil</h2>
                                     <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />
                                 </div>
                             )}
                             
                             {activeSection === 'password' && (
-                                <div className="animate-in fade-in duration-500 space-y-12">
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-12">
                                     <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] mb-8 border-b-2 border-[#E5E7EB] pb-4 uppercase">Seguridad de la Cuenta</h2>
                                     <UpdatePasswordForm />
                                     <div className="pt-10 border-t-2 border-red-50">
@@ -130,7 +148,7 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                             )}
 
                             {activeSection === 'legal' && (
-                                <div className="animate-in fade-in duration-500 space-y-4">
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-4">
                                     <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] mb-8 border-b-2 border-[#E5E7EB] pb-4 uppercase">Centro Legal</h2>
                                     <PolicyItem title="Aviso de Privacidad" icon={<FileText size={22} />} />
                                     <PolicyItem title="Términos y Condiciones" icon={<Info size={22} />} />
