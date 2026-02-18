@@ -14,44 +14,46 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * Muestra el formulario para editar el perfil del usuario.
+     * SECCIÓN: VISUALIZACIÓN DEL PERFIL
      */
     public function edit(Request $request): Response
     {
         return Inertia::render('Profile/Edit', [
+            // Verifica si el usuario debe confirmar su email
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            
+            // Envía mensajes de éxito
             'status' => session('status'),
+            
+            // 📍 DIRECCIONES (Optimizado)
+            // Ordenamos primero por 'is_default' (desc) para que la principal salga al inicio
+            // y luego por las más recientes (latest).
+            'addresses' => $request->user()->addresses()
+                ->orderBy('is_default', 'desc')
+                ->latest()
+                ->get(),
         ]);
     }
 
     /**
-     * Actualiza la información del perfil del usuario.
+     * SECCIÓN: ACTUALIZACIÓN DE DATOS PERSONALES
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        // 1. Cargamos los datos validados (name, last_name, email, phone)
         $user = $request->user();
         $user->fill($request->validated());
 
-        // 2. SEGURIDAD DE PEDIDOS: Si cambia el correo, invalidamos la verificación.
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
-            
-            // Opcional: Podrías disparar el evento de notificación de nuevo aquí
-            // $user->sendEmailVerificationNotification();
         }
 
-        // 3. Guardamos todos los datos (incluyendo apellidos y teléfono para las guías)
         $user->save();
 
-        // 4. Redirección inteligente:
-        // Si el usuario ya no está verificado, Laravel lo mandará a la pantalla 
-        // de "Verify Email" automáticamente en la siguiente petición.
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
-     * Elimina la cuenta del usuario de forma definitiva.
+     * SECCIÓN: ELIMINACIÓN DE CUENTA
      */
     public function destroy(Request $request): RedirectResponse
     {

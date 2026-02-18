@@ -1,32 +1,26 @@
 import React, { useState } from "react";
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import Header from "@/Components/Public/Header";
 import Footer from "@/Components/Public/Footer";
-import InputError from '@/Components/InputError';
+// CORRECCIÓN: Aseguramos que el import sea de lucide-react
 import { 
     User, Lock, MapPin, ShoppingBag, LogOut, ChevronRight, 
-    FileText, ShieldAlert, PackageOpen, Info, Truck, RotateCcw, Plus, Home 
+    FileText, ShieldAlert, Info, Truck, RotateCcw, Home 
 } from "lucide-react";
 
-// Parciales
+// Parciales existentes
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import DeleteUserForm from './Partials/DeleteUserForm';
 
-export default function Edit({ auth, mustVerifyEmail, status }) {
+// Nuevos Parciales
+import MyOrders from './Partials/MyOrders';
+import AddressManager from './Partials/AddressManager';
+
+// AGREGAMOS 'addresses' a las props (viene desde el controlador de Laravel)
+export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) {
     const [activeSection, setActiveSection] = useState('pedidos');
     const [showForm, setShowForm] = useState(false);
-
-    // Lógica para el formulario de direcciones usando Inertia useForm
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        address: '',
-        cp: '',
-        phone: '',
-        state: 'Chihuahua',
-        city: '',
-        references: '',
-    });
 
     const mainStyle = { 
         fontFamily: "'Nunito', sans-serif",
@@ -37,16 +31,6 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
     const changeSection = (section) => {
         setActiveSection(section);
         setShowForm(false);
-    };
-
-    const submitAddress = (e) => {
-        e.preventDefault();
-        post(route('profile.address.store'), {
-            onSuccess: () => {
-                reset();
-                setShowForm(false);
-            },
-        });
     };
 
     return (
@@ -75,8 +59,6 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
                             </div>
 
                             <nav className="flex lg:flex-col overflow-x-auto lg:overflow-visible p-3 gap-1 no-scrollbar bg-white">
-                                
-                                {/* BOTÓN IR AL INICIO - INTEGRADO EN EL RECUADRO */}
                                 <Link 
                                     href="/" 
                                     className="flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-[1px] text-[#1E3A8A] hover:bg-blue-50 rounded-xl transition-all border-b border-[#F3F4F6] mb-2 group"
@@ -114,109 +96,17 @@ export default function Edit({ auth, mustVerifyEmail, status }) {
                     <div className="flex-1 w-full">
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-6 lg:p-12 min-h-[600px]">
                             
-                            {/* SECCIÓN: MIS PEDIDOS (ADAPTADA) */}
-                            {activeSection === 'pedidos' && (
-                                <div className="animate-in fade-in duration-500">
-                                    <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] mb-8 border-b-2 border-[#E5E7EB] pb-4 uppercase">Mis Pedidos</h2>
-                                    <div className="flex flex-col items-center justify-center py-16 lg:py-24 text-center">
-                                        <div className="mb-8">
-                                            {/* Caja más grande y sin el círculo gris */}
-                                            <PackageOpen size={120} className="text-[#E5E7EB]" strokeWidth={1} />
-                                        </div>
-                                        <h3 className="text-xl lg:text-2xl font-bold text-[#1F2937] mb-2">Parece que aún no has comprado</h3>
-                                        <p className="text-[#6B7280] text-base mb-10 max-w-sm font-medium">Tus compras aparecerán aquí para que puedas gestionar tus envíos.</p>
-                                        <Link href="/" className="bg-[#1E3A8A] text-white px-10 py-4 rounded-xl font-extrabold text-sm uppercase tracking-widest hover:bg-[#162d6e] transition-all shadow-lg shadow-blue-900/10">
-                                            Explorar productos
-                                        </Link>
-                                    </div>
-                                </div>
-                            )}
+                            {activeSection === 'pedidos' && <MyOrders />}
 
-                            {/* SECCIÓN: DIRECCIONES */}
                             {activeSection === 'direcciones' && (
-                                <div className="animate-in slide-in-from-bottom-4 duration-500">
-                                    <div className="flex justify-between items-center mb-10 border-b-2 border-[#E5E7EB] pb-6">
-                                        <div>
-                                            <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] uppercase tracking-tighter">
-                                                {showForm ? 'Nueva Dirección' : 'Mis Direcciones'}
-                                            </h2>
-                                            <p className="text-sm font-bold text-gray-500 mt-1">Gestiona tus lugares de entrega frecuentes.</p>
-                                        </div>
-                                        {showForm && (
-                                            <button onClick={() => setShowForm(false)} className="flex items-center gap-2 text-xs font-black text-[#F59E0B] uppercase tracking-widest hover:text-[#1E3A8A] transition-colors">
-                                                <RotateCcw size={16} /> Volver al listado
-                                            </button>
-                                        )}
-                                    </div>
-
-                                    {!showForm ? (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            <button 
-                                                onClick={() => setShowForm(true)}
-                                                className="group border-2 border-dashed border-[#E5E7EB] rounded-2xl p-10 flex flex-col items-center justify-center gap-4 hover:border-[#F59E0B] hover:bg-amber-50/50 transition-all min-h-[250px]"
-                                            >
-                                                <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#F59E0B] transition-colors shadow-sm">
-                                                    <Plus size={32} className="text-[#6B7280] group-hover:text-[#1E3A8A]" strokeWidth={3} />
-                                                </div>
-                                                <span className="text-lg font-black text-[#6B7280] group-hover:text-[#1E3A8A] uppercase tracking-tight">Agregar nueva dirección</span>
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <form onSubmit={submitAddress} className="max-w-3xl space-y-6 animate-in fade-in duration-300">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Nombre Completo del Destinatario</label>
-                                                    <input type="text" className="input-style" placeholder="Ej. Juan Pérez" value={data.name} onChange={e => setData('name', e.target.value)} />
-                                                    <InputError message={errors.name} className="mt-1 font-bold" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Calle y Número</label>
-                                                    <input type="text" className="input-style" placeholder="Nombre de calle, número exterior e interior" value={data.address} onChange={e => setData('address', e.target.value)} />
-                                                    <InputError message={errors.address} className="mt-1 font-bold" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Código Postal</label>
-                                                    <input type="text" className="input-style" placeholder="33800" value={data.cp} onChange={e => setData('cp', e.target.value)} />
-                                                    <InputError message={errors.cp} className="mt-1 font-bold" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Teléfono de Contacto</label>
-                                                    <input type="tel" className="input-style" placeholder="627 123 4567" value={data.phone} onChange={e => setData('phone', e.target.value)} />
-                                                    <InputError message={errors.phone} className="mt-1 font-bold" />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Estado</label>
-                                                    <select className="input-style bg-white appearance-none cursor-pointer" value={data.state} onChange={e => setData('state', e.target.value)}>
-                                                        <option value="Chihuahua">Chihuahua</option>
-                                                        <option value="Durango">Durango</option>
-                                                        <option value="Coahuila">Coahuila</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Ciudad / Localidad</label>
-                                                    <input type="text" className="input-style" placeholder="Hidalgo del Parral" value={data.city} onChange={e => setData('city', e.target.value)} />
-                                                    <InputError message={errors.city} className="mt-1 font-bold" />
-                                                </div>
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-[11px] font-black text-black uppercase tracking-widest mb-1">Referencias Adicionales</label>
-                                                    <textarea className="input-style h-32 resize-none pt-4" placeholder="Descripción de la fachada, entre qué calles se ubica..." value={data.references} onChange={e => setData('references', e.target.value)}></textarea>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-gray-100">
-                                                <button type="submit" disabled={processing} className="w-full sm:w-auto bg-[#1E3A8A] text-white px-12 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-md hover:bg-[#162d6b] hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50">
-                                                    {processing ? 'Guardando...' : 'Guardar Dirección'}
-                                                </button>
-                                                <button type="button" onClick={() => setShowForm(false)} className="w-full sm:w-auto bg-white text-gray-500 border-2 border-gray-200 px-12 py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-gray-50 transition-all">
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        </form>
-                                    )}
-                                </div>
+                                /* PASAMOS LA PROP addresses AQUÍ */
+                                <AddressManager 
+                                    showForm={showForm} 
+                                    setShowForm={setShowForm} 
+                                    addresses={addresses} 
+                                />
                             )}
 
-                            {/* SECCIONES PERFIL, SEGURIDAD, LEGAL (SIN CAMBIOS) */}
                             {activeSection === 'perfil' && (
                                 <div className="animate-in fade-in duration-500">
                                     <h2 className="text-2xl lg:text-3xl font-black text-[#1E3A8A] mb-8 border-b-2 border-[#E5E7EB] pb-4 uppercase">Información del Perfil</h2>

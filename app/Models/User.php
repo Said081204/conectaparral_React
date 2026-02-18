@@ -11,9 +11,6 @@ use Illuminate\Notifications\Notifiable;
 
 /**
  * IMPORTACIONES PARA PERSONALIZAR CORREOS
- * VerifyEmail: La lógica original de verificación.
- * ResetPassword: La lógica original de recuperación de contraseña.
- * MailMessage: Herramienta para construir el diseño del correo (botones, líneas, saludos).
  */
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -49,6 +46,12 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
         ];
     }
 
+    /*
+    |--------------------------------------------------------------------------
+    | RELACIONES
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Relación con el perfil de vendedor.
      */
@@ -58,8 +61,20 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
     }
 
     /**
-     * Helpers para verificar roles rápidamente.
+     * NUEVO: Relación con las direcciones de envío.
+     * Esto es lo que permite que el sistema sepa qué cuenta está registrando la dirección.
      */
+    public function addresses()
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | HELPERS DE ROL
+    |--------------------------------------------------------------------------
+    */
+
     public function isAdmin(): bool { return $this->role === 'admin'; }
     public function isVendor(): bool { return $this->role === 'vendor'; }
     public function isCustomer(): bool { return $this->role === 'customer'; }
@@ -68,38 +83,26 @@ class User extends Authenticatable implements MustVerifyEmail, CanResetPasswordC
     |--------------------------------------------------------------------------
     | PERSONALIZACIÓN DE NOTIFICACIONES (CORREOS)
     |--------------------------------------------------------------------------
-    | Estos métodos sobrescriben los que Laravel trae por defecto. 
-    | Nos permiten cambiar el idioma inglés a español y ajustar los textos.
     */
 
-    /**
-     * Personalización del correo de Verificación de Email.
-     * Se activa automáticamente cuando un usuario se registra.
-     */
     public function sendEmailVerificationNotification()
     {
-        // Creamos una "clase anónima" que extiende de la original para cambiar solo el mensaje
         $this->notify(new class extends VerifyEmail {
             public function toMail($notifiable)
             {
                 return (new MailMessage)
-                    ->subject('¡Bienvenido! Confirma tu correo en ConectaParral') // Título del correo
-                    ->greeting('¡Hola, qué gusto saludarte!') // Saludo inicial
+                    ->subject('¡Bienvenido! Confirma tu correo en ConectaParral')
+                    ->greeting('¡Hola, qué gusto saludarte!')
                     ->line('Gracias por registrarte en ConectaParral. Para activar tu cuenta y comenzar a explorar, por favor confirma tu dirección de correo electrónico.')
-                    ->action('Verificar mi cuenta', $this->verificationUrl($notifiable)) // Texto del botón y URL generada
+                    ->action('Verificar mi cuenta', $this->verificationUrl($notifiable))
                     ->line('Si no creaste esta cuenta, simplemente ignora este mensaje.')
-                    ->salutation('Atentamente, El equipo de ConectaParral'); // Despedida
+                    ->salutation('Atentamente, El equipo de ConectaParral');
             }
         });
     }
 
-    /**
-     * Personalización del correo de Restablecimiento de Contraseña.
-     * Se activa cuando el usuario olvida su clave y pide el enlace de recuperación.
-     */
     public function sendPasswordResetNotification($token)
     {
-        // Pasamos el $token necesario para que el enlace sea válido y seguro
         $this->notify(new class($token) extends ResetPassword {
             public function toMail($notifiable)
             {
