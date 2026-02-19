@@ -4,29 +4,29 @@ import Header from "@/Components/Public/Layout/Header";
 import Footer from "@/Components/Public/Layout/Footer";
 import { 
     User, Lock, MapPin, ShoppingBag, LogOut, ChevronRight, 
-    FileText, ShieldAlert, Info, Truck, RotateCcw, Home 
+    FileText, ShieldAlert, Info, Truck, RotateCcw, Home,
+    LayoutDashboard, Package, ShieldCheck, CreditCard
 } from "lucide-react";
 
 // Parciales existentes
-import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
-import UpdatePasswordForm from './Partials/UpdatePasswordForm';
-import DeleteUserForm from './Partials/DeleteUserForm';
+import UpdateProfileInformationForm from './Sections/UpdateProfileInformationForm';
+import UpdatePasswordForm from './Sections/UpdatePasswordForm';
+import DeleteUserForm from './Sections/DeleteUserForm';
 
 // Nuevos Parciales
-import MyOrders from './Partials/MyOrders';
-import AddressManager from './Partials/AddressManager';
+import MyOrders from './Sections/MyOrders';
+import AddressManager from './Sections/AddressManager';
 
 export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) {
-    // Estado inicial: intentamos leer de la URL, si no, por defecto 'pedidos'
-    const [activeSection, setActiveSection] = useState('pedidos');
+    // Estado inicial cambiado a 'resumen' para que sea lo primero que vea el usuario
+    const [activeSection, setActiveSection] = useState('resumen');
     const [showForm, setShowForm] = useState(false);
 
-    // Lógica para detectar el cambio de sección mediante parámetros URL (?tab=...)
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const tab = params.get('tab');
         
-        const validTabs = ['pedidos', 'direcciones', 'perfil', 'password', 'legal'];
+        const validTabs = ['resumen', 'pedidos', 'direcciones', 'perfil', 'password', 'legal'];
         if (tab && validTabs.includes(tab)) {
             setActiveSection(tab);
         }
@@ -41,7 +41,6 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
     const changeSection = (section) => {
         setActiveSection(section);
         setShowForm(false);
-        // Opcional: Limpia la URL para evitar comportamientos extraños al recargar
         window.history.replaceState({}, '', window.location.pathname);
     };
 
@@ -60,36 +59,30 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm overflow-hidden sticky top-24">
                             <div className="p-6 bg-[#1E3A8A] text-white">
                                 <div className="flex items-center gap-4">
-                                    <div className="h-12 w-12 bg-[#F59E0B] rounded-xl flex items-center justify-center text-[#1E3A8A] text-xl font-extrabold shadow-inner shrink-0">
+                                    <div className="h-14 w-14 bg-[#F59E0B] rounded-2xl flex items-center justify-center text-[#1E3A8A] text-2xl font-black shadow-lg rotate-3">
                                         {auth.user.name.charAt(0).toUpperCase()}
                                     </div>
                                     <div className="overflow-hidden">
-                                        <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest text-[#F59E0B]">Panel de Usuario</p>
+                                        <p className="text-[10px] font-bold opacity-80 uppercase tracking-widest text-[#F59E0B]">Cliente VIP</p>
                                         <p className="font-extrabold truncate text-lg leading-tight">{auth.user.name}</p>
                                     </div>
                                 </div>
                             </div>
 
                             <nav className="flex lg:flex-col overflow-x-auto lg:overflow-visible p-3 gap-1 no-scrollbar bg-white">
-                                <Link 
-                                    href="/" 
-                                    className="flex items-center gap-4 px-5 py-4 text-xs font-black uppercase tracking-[1px] text-[#1E3A8A] hover:bg-blue-50 rounded-xl transition-all border-b border-[#F3F4F6] mb-2 group"
-                                >
-                                    <Home size={18} className="group-hover:scale-110 transition-transform text-[#F59E0B]" strokeWidth={2.5} />
-                                    Ir a la Tienda
-                                </Link>
-
+                                <SidebarLink label="Resumen" icon={<LayoutDashboard size={20}/>} active={activeSection === 'resumen'} onClick={() => changeSection('resumen')} />
+                                
                                 <div className="hidden lg:block"><SectionTitle label="Actividad" /></div>
                                 <SidebarLink label="Mis Pedidos" icon={<ShoppingBag size={20}/>} active={activeSection === 'pedidos'} onClick={() => changeSection('pedidos')} />
                                 <SidebarLink label="Direcciones" icon={<MapPin size={20}/>} active={activeSection === 'direcciones'} onClick={() => changeSection('direcciones')} />
                                 
                                 <div className="hidden lg:block h-2"></div>
                                 <div className="hidden lg:block"><SectionTitle label="Configuración" /></div>
-                                <SidebarLink label="Perfil" icon={<User size={20}/>} active={activeSection === 'perfil'} onClick={() => changeSection('perfil')} />
+                                <SidebarLink label="Mi Perfil" icon={<User size={20}/>} active={activeSection === 'perfil'} onClick={() => changeSection('perfil')} />
                                 <SidebarLink label="Seguridad" icon={<Lock size={20}/>} active={activeSection === 'password'} onClick={() => changeSection('password')} />
                                 
                                 <div className="hidden lg:block h-2"></div>
-                                <div className="hidden lg:block"><SectionTitle label="Información" /></div>
+                                <div className="hidden lg:block"><SectionTitle label="Soporte" /></div>
                                 <SidebarLink label="Legal" icon={<FileText size={20}/>} active={activeSection === 'legal'} onClick={() => changeSection('legal')} />
                                 
                                 <Link 
@@ -109,6 +102,58 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                     <div className="flex-1 w-full">
                         <div className="bg-white border border-[#E5E7EB] rounded-2xl shadow-sm p-6 lg:p-12 min-h-[600px]">
                             
+                            {/* SECCIÓN 1: RESUMEN / DASHBOARD (NUEVO) */}
+                            {activeSection === 'resumen' && (
+                                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                    <div className="mb-10">
+                                        <h2 className="text-3xl font-black text-[#1E3A8A] uppercase italic">Mi Cuenta</h2>
+                                        <p className="text-gray-500 font-bold">Bienvenido a tu panel personal, gestiona tus compras y datos fácilmente.</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <DashboardCard 
+                                            title="Mis Pedidos" 
+                                            description="Revisa el estado de tus compras y facturas."
+                                            icon={<Package className="text-[#F59E0B]" size={32} />}
+                                            onClick={() => changeSection('pedidos')}
+                                        />
+                                        <DashboardCard 
+                                            title="Información Personal" 
+                                            description="Actualiza tu nombre, correo y teléfono."
+                                            icon={<User className="text-[#F59E0B]" size={32} />}
+                                            onClick={() => changeSection('perfil')}
+                                        />
+                                        <DashboardCard 
+                                            title="Tus Direcciones" 
+                                            description="Gestiona tus puntos de entrega y facturación."
+                                            icon={<MapPin className="text-[#F59E0B]" size={32} />}
+                                            onClick={() => changeSection('direcciones')}
+                                        />
+                                        <DashboardCard 
+                                            title="Seguridad" 
+                                            description="Cambia tu contraseña y protege tu acceso."
+                                            icon={<ShieldCheck className="text-[#F59E0B]" size={32} />}
+                                            onClick={() => changeSection('password')}
+                                        />
+                                    </div>
+
+                                    {/* Info Adicional tipo "Amazon" */}
+                                    <div className="mt-10 p-6 bg-amber-50 rounded-3xl border-2 border-amber-100 flex flex-col md:flex-row items-center gap-6">
+                                        <div className="h-16 w-16 bg-white rounded-full flex items-center justify-center shadow-sm shrink-0">
+                                            <Truck className="text-[#F59E0B]" />
+                                        </div>
+                                        <div>
+                                            <h4 className="font-black text-[#1E3A8A] uppercase">Envíos Gratuitos</h4>
+                                            <p className="text-sm text-gray-600 font-bold italic">Recuerda que en compras mayores a $999 el envío corre por nuestra cuenta.</p>
+                                        </div>
+                                        <Link href="/" className="md:ml-auto px-6 py-3 bg-[#1E3A8A] text-white rounded-xl font-black text-xs uppercase hover:bg-[#F59E0B] transition-colors">
+                                            Ir a comprar
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* RESTO DE SECCIONES */}
                             {activeSection === 'pedidos' && (
                                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                                     <MyOrders />
@@ -170,7 +215,6 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
                     transition: all 150ms; font-size: 1rem; font-weight: 700; color: black; margin-top: 0.25rem;
                 }
                 .input-style:focus { border-color: #1E3A8A; box-shadow: 0 0 0 4px #eff6ff; }
-                textarea.input-style { height: auto; min-height: 120px; }
                 .no-scrollbar::-webkit-scrollbar { display: none; }
                 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -184,6 +228,24 @@ export default function Edit({ auth, mustVerifyEmail, status, addresses = [] }) 
 }
 
 // --- SUB-COMPONENTES AUXILIARES ---
+
+function DashboardCard({ title, description, icon, onClick }) {
+    return (
+        <button 
+            onClick={onClick}
+            className="flex items-center gap-6 p-6 border-2 border-gray-100 rounded-3xl hover:border-[#F59E0B] hover:shadow-xl hover:shadow-gray-100 transition-all bg-white group text-left w-full"
+        >
+            <div className="h-16 w-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-amber-50 transition-colors shrink-0">
+                {icon}
+            </div>
+            <div>
+                <h3 className="font-black text-[#1E3A8A] uppercase tracking-tight group-hover:text-[#F59E0B] transition-colors">{title}</h3>
+                <p className="text-sm text-gray-500 font-bold leading-tight">{description}</p>
+            </div>
+            <ChevronRight className="ml-auto text-gray-300 group-hover:text-[#F59E0B]" size={20} />
+        </button>
+    );
+}
 
 function PolicyItem({ title, icon }) {
     return (
