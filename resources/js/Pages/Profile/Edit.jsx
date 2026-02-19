@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Head, Link } from '@inertiajs/react';
-import Header from "@/Components/Public/Header";
-import Footer from "@/Components/Public/Footer";
+import Header from "@/Components/Public/Layout/Header";
+import Footer from "@/Components/Public/Layout/Footer";
 import { 
     User, Lock, MapPin, ShoppingBag, LogOut, ChevronRight, 
     FileText, ShieldAlert, Info, Truck, RotateCcw, Home 

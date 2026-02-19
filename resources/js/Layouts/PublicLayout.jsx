@@ -1,6 +1,6 @@
 import React from "react";
-import Header from "@/Components/Public/Header"; // Asegúrate de que la ruta sea correcta
-import Footer from "@/Components/Public/Footer"; // Asegúrate de que la ruta sea correcta
+import Header from "@/Components/Public/Layout/Header"; // Asegúrate de que la ruta sea correcta
+import Footer from "@/Components/Public/Layout/Footer"; // Asegúrate de que la ruta sea correcta
 
 export default function PublicLayout({ children, user }) {
   return (

@@ -3,9 +3,9 @@ import PublicLayout from "@/Layouts/PublicLayout";
 import { usePage } from "@inertiajs/react";
 
 // Componentes adaptados
-import Portada from "@/Components/Public/Portada";
-import Categorias from "@/Components/Public/Categorias";
-import Productos from "@/Components/Public/Productos";
+import Portada from "@/Components/Public/Home/Portada";
+import Categorias from "@/Components/Public/Home/Categorias";
+import Productos from "@/Components/Public/Home/Productos";
 
 export default function Home({ auth }) {
     // Usamos usePage de forma segura
