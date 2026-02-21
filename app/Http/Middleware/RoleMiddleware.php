@@ -10,32 +10,37 @@ class RoleMiddleware
 {
     /**
      * Maneja la solicitud entrante y filtra por jerarquía de usuarios.
+     * Soporta múltiples roles: 'admin', 'vendor', 'customer'.
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        // 1. Obtenemos el objeto del usuario que está intentando acceder a la ruta.
+        // 1. Obtenemos el objeto del usuario que está intentando acceder.
         $user = $request->user();
 
         // 2. Verificamos si el usuario ha iniciado sesión. 
-        // Si no hay usuario (null), detenemos la ejecución con un error 401 (No autenticado).
-        if (!$user) abort(401);
-
-        // 3. Verificamos si la cuenta del usuario está marcada como activa.
-        // Esto permite banear o suspender usuarios (clientes o vendedores) 
-        // de manera inmediata sin borrar sus datos.
-        if (!$user->is_active) {
-            abort(403, 'Cuenta desactivada.');
+        if (!$user) {
+            return redirect()->route('login');
         }
 
-        // 4. Comprobamos si el rol del usuario coincide con alguno de los permitidos para esta ruta.
-        // El operador "...$roles" permite que pasemos varios roles a la vez (ej: admin y vendor).
-        // Si el rol del usuario no está en la lista autorizada, lanzamos un error 403 (Prohibido).
+        /**
+         * 3. Verificamos si la cuenta está activa (Lógica selectiva)
+         * - Bloqueamos a Admins y Vendedores si is_active es 0.
+         * - Dejamos pasar al Customer aunque is_active sea 0 (según lo acordado).
+         */
+        if (in_array($user->role, ['admin', 'vendor']) && !$user->is_active) {
+            // Si el Admin o Vendedor está desactivado, lo mandamos fuera de las áreas protegidas
+            abort(403, 'Tu acceso administrativo en Conecta Parral ha sido desactivado. Contacta al soporte.');
+        }
+
+        /**
+         * 4. Lógica de Jerarquía y Roles
+         * Verifica si el rol del usuario está dentro de los permitidos para la ruta.
+         */
         if (!in_array($user->role, $roles, true)) {
-            abort(403, 'No autorizado.');
+            abort(403, 'No tienes permisos para acceder a esta sección.');
         }
 
-        // 5. Si el usuario está logueado, activo y tiene el rol correcto,
-        // permitimos que la solicitud continúe hacia el controlador.
+        // 5. Si todo está en orden, permitimos el paso.
         return $next($request);
     }
 }

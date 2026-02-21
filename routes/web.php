@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
-use App\Http\Controllers\Public\AddressController; 
+use App\Http\Controllers\Public\AddressController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -29,11 +29,13 @@ require __DIR__.'/auth.php';
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'verified'])->group(function () {
-    
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+
+    /**
+     * DASHBOARD DISTRIBUIDOR
+     * Carga 'Pages/Dashboard.jsx' y ahí rediriges por rol
+     */
+    Route::get('/dashboard', fn () => Inertia::render('Dashboard'))
+        ->name('dashboard');
 
     // Perfil
     Route::get('/profile', [ProfileController::class, 'edit'])
@@ -45,35 +47,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🔥 GESTIÓN DE DIRECCIONES
-    |--------------------------------------------------------------------------
-    */
+    // Direcciones
     Route::prefix('profile/address')->name('profile.address.')->group(function () {
-        // Guardar nueva dirección
-        Route::post('/', [AddressController::class, 'store'])
-            ->name('store');
-
-        // Actualizar dirección existente (Editar)
-        Route::put('/{address}', [AddressController::class, 'update'])
-            ->name('update');
-
-        // Eliminar dirección
-        Route::delete('/{address}', [AddressController::class, 'destroy'])
-            ->name('destroy');
-
-        // Establecer como principal (Favorito)
-        Route::patch('/{address}/default', [AddressController::class, 'default'])
-            ->name('default');
+        Route::post('/', [AddressController::class, 'store'])->name('store');
+        Route::put('/{address}', [AddressController::class, 'update'])->name('update');
+        Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
+        Route::patch('/{address}/default', [AddressController::class, 'default'])->name('default');
     });
 });
 
 /*
 |--------------------------------------------------------------------------
-| 4. Rutas Públicas / Vendor / Admin
+| 4. Rutas Públicas / Externas
 |--------------------------------------------------------------------------
 */
 require __DIR__.'/public.php';
-require __DIR__.'/vendor.php';
-require __DIR__.'/admin.php';
